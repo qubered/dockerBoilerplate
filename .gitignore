@@ -1,0 +1,8 @@
+# Ignore all .env files, no matter where they are
+.env
+
+# Ignore all directories named 'data', no matter where they are
+data/
+certs/
+
+!backbone/traefik/data/

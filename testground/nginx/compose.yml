@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  nginx:
+    user: "1000:1000"
+    image: nginx:latest
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-https.tls=true"
+      - "traefik.http.routers.nginx-https.tls.certresolver=cloudflare"
+      - "traefik.http.routers.nginx-https.entrypoints=websecure"
+      - "traefik.http.routers.nginx-https.rule=Host(`nginx.rvlt.app`)"
+      - "traefik.http.routers.nginx-https.middlewares=authentik@file"
+networks:
+  frontend:
+    external: true

@@ -1,0 +1,28 @@
+services:
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Sydney
+    volumes:
+      - ./data/config:/config
+      - /mnt/data/incomplete-downloads:/incomplete-downloads #optional
+      - /mnt/data/downloads:/downloads #optional
+    restart: unless-stopped
+    networks:
+      - frontend
+      - media_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.rule=Host(`nzb.rvlt.app`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=websecure"
+      - "traefik.http.routers.sabnzbd.tls.certresolver=cloudflare"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
+
+networks:
+  frontend:
+    external: true
+  media_backend:
+    external: true

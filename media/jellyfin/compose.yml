@@ -1,0 +1,49 @@
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Sydney
+      - NVIDIA_VISIBLE_DEVICES=all
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.rvlt.app
+    volumes:
+      - ./data/jellyfin-config:/config
+      - /mnt/data/media/tv:/data/tvshows
+      - /mnt/data/media/movies:/data/movies
+      - /mnt/data/media/music:/data/music
+    ports:
+      - 7359:7359/udp
+      - 1900:1900/udp
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+
+      # Your existing router, now with the added redirect middleware
+      - "traefik.http.routers.jellyfin-https.tls=true"
+      - "traefik.http.routers.jellyfin-https.tls.certresolver=cloudflare"
+      - "traefik.http.routers.jellyfin-https.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-https.rule=Host(`jellyfin.rvlt.app`)"
+      # # Apply the redirect middleware FIRST, then the Authentik forward auth middleware
+      # - "traefik.http.routers.jellyfin-https.middlewares=jellyfin-sso-redirect@docker,authentik@file"
+
+      # # Define the redirect middleware to send root requests directly to SSO start page
+      # - "traefik.http.middlewares.jellyfin-sso-redirect.redirectregex.regex=^https://jellyfin.rvlt.app/?$$" # Matches the root path
+      # - "traefik.http.middlewares.jellyfin-sso-redirect.redirectregex.replacement=https://jellyfin.rvlt.app/sso/OID/start/authentik"
+      # - "traefik.http.middlewares.jellyfin-sso-redirect.redirectregex.permanent=false" # Use false for temporary redirect (302)
+
+      # Service definition remains the same
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+networks:
+  frontend:
+    external: true

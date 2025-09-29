@@ -1,0 +1,29 @@
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Sydney
+    networks:
+      - frontend
+      - media_backend
+    volumes:
+      - ./data:/config
+      - /mnt/data/media/tv:/tv #optional
+      - /mnt/data/downloads:/downloads #optional
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr-https.tls=true"
+      - "traefik.http.routers.sonarr-https.tls.certresolver=cloudflare"
+      - "traefik.http.routers.sonarr-https.entrypoints=websecure"
+      - "traefik.http.routers.sonarr-https.rule=Host(`sonarr.rvlt.app`)"
+      - "traefik.http.routers.sonarr-https.middlewares=authentik@file"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+networks:
+  frontend:
+    external: true
+  media_backend:
+    external: true
