@@ -1,6 +1,6 @@
 services:
   traefik:
-    user: "1000:1000"
+    user: "0:1000"
     image: docker.io/library/traefik:v3.5.3
     container_name: traefik
     ports:
@@ -11,7 +11,7 @@ services:
       # <--
     volumes:
       - /run/docker.sock:/run/docker.sock:ro
-      - ./  data/config/:/etc/traefik/:ro
+      - ./data/config/:/etc/traefik/:ro
       - ./data/certs/:/var/traefik/certs/:rw
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
