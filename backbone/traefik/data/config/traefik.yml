@@ -31,6 +31,8 @@ entryPoints:
   websecure:
     address: :443
 
+  minecraft:
+    address: :25565
 # -- Configure your CertificateResolver here...
 certificatesResolvers:
   cloudflare:
@@ -58,3 +60,9 @@ providers:
   file:
     directory: /etc/traefik/conf/
     watch: true
+
+experimental:
+  plugins:
+    GeoBlock:
+      moduleName: "github.com/PascalMinder/GeoBlock"
+      version: "v0.2.2"

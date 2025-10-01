@@ -1,32 +1,39 @@
-http:
-  routers:
-    prod1-https:
-      entryPoints:
-        - websecure
-      rule: "Host(`prod1.rvlt.app`)"
-      middlewares:
-        - authentik@file
-      service: prod1-service
-      tls:
-        certResolver: cloudflare
+# Temporarily commented out due to serversTransport field issue
+# http:
+#   routers:
+#     prod1-https:
+#       entryPoints:
+#         - websecure
+#       rule: "Host(`prod1.rvlt.app`)"
+#       middlewares:
+#         - authentik@file
+#       service: prod1-service
+#       tls:
+#         certResolver: cloudflare
 
-    prod2-https:
-      entryPoints:
-        - websecure
-      rule: "Host(`prod2.rvlt.app`)"
-      middlewares:
-        - authentik@file
-      service: prod2-service
-      tls:
-        certResolver: cloudflare
+#     prod2-https:
+#       entryPoints:
+#         - websecure
+#       rule: "Host(`prod2.rvlt.app`)"
+#       middlewares:
+#         - authentik@file
+#       service: prod2-service
+#       tls:
+#         certResolver: cloudflare
 
-  services:
-    prod1-service:
-      loadBalancer:
-        servers:
-          - url: "http://10.0.3.11:8006"
+#   services:
+#     prod1-service:
+#       serversTransport: proxmox-insecure-transport
+#       loadBalancer:
+#         servers:
+#           - url: "http://10.0.3.11:8006"
 
-    prod2-service:
-      loadBalancer:
-        servers:
-          - url: "http://10.0.3.2:8006"
+#     prod2-service:
+#       serversTransport: proxmox-insecure-transport
+#       loadBalancer:
+#         servers:
+#           - url: "http://10.0.3.2:8006"
+
+#   serversTransports: # Define the custom transport here
+#     proxmox-insecure-transport:
+#       insecureSkipVerify: true

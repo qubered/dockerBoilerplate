@@ -1,0 +1,40 @@
+networks:
+  frontend:
+    external: true
+
+services:
+    crafty:
+        container_name: crafty_container
+        image: registry.gitlab.com/crafty-controller/crafty-4:latest
+        restart: unless-stopped
+        environment:
+            - TZ=Australia/Sydney
+        volumes:
+            - ./data/backups:/crafty/backups
+            - ./data/logs:/crafty/logs
+            - ./data/servers:/crafty/servers
+            - ./data/config:/crafty/app/config
+            - ./data/import:/crafty/import
+        networks:
+            - frontend
+        labels:
+            # Enable Traefik
+            - "traefik.enable=true"
+            
+            # HTTP Router for Web Interface (with Authentik middleware)
+            - "traefik.http.routers.crafty-web.rule=Host(`crafty.rvlt.app`)" # Change to your domain
+            - "traefik.http.routers.crafty-web.entrypoints=websecure"
+            - "traefik.http.routers.crafty-web.tls=true"
+            - "traefik.http.routers.crafty-web.tls.certresolver=cloudflare"
+            - "traefik.http.routers.crafty-web.middlewares=authentik@file"
+            - "traefik.http.routers.crafty-web.service=crafty-web"
+            - "traefik.http.services.crafty-web.loadbalancer.server.port=8443"
+            - "traefik.http.services.crafty-web.loadbalancer.server.scheme=https"
+            - "traefik.http.services.crafty-web.loadbalancer.serversTransport=insecure-transport@file"
+            
+            # TCP Router for Minecraft Server (GeoBlock middleware temporarily disabled)
+            - "traefik.tcp.routers.crafty-minecraft.rule=HostSNI(`*`)"
+            - "traefik.tcp.routers.crafty-minecraft.entrypoints=minecraft"
+            # - "traefik.tcp.routers.crafty-minecraft.middlewares=my-GeoBlock@file"
+            - "traefik.tcp.routers.crafty-minecraft.service=crafty-minecraft"
+            - "traefik.tcp.services.crafty-minecraft.loadbalancer.server.port=25565" # Default MC port, adjust if needed
